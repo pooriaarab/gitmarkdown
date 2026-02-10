@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, GitBranch, Search, Loader2, ExternalLink, Lock, Globe } from 'lucide-react';
+import { Plus, GitBranch, Search, Loader2, Lock, Globe, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [connecting, setConnecting] = useState<number | null>(null);
+  const [manageUrl, setManageUrl] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,6 +30,13 @@ export default function DashboardPage() {
       getUserWorkspaces(user.uid).then(setWorkspaces);
     }
   }, [user, fetchRepos]);
+
+  useEffect(() => {
+    fetch('/api/auth/github-manage-url')
+      .then((res) => res.json())
+      .then((data) => { if (data.manageUrl) setManageUrl(data.manageUrl); })
+      .catch(() => {});
+  }, []);
 
   const connectedRepoIds = new Set(workspaces.map((w) => w.repoId));
 
@@ -118,18 +126,30 @@ export default function DashboardPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Connect a Repository</h2>
-            <Button
-              data-testid="refresh-repos-button"
-              aria-label="Refresh repository list from GitHub"
-              aria-busy={reposLoading}
-              variant="outline"
-              size="sm"
-              onClick={fetchRepos}
-              disabled={reposLoading}
-            >
-              {reposLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              {manageUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(manageUrl, '_blank', 'noopener,noreferrer')}
+                >
+                  <Building2 className="mr-2 h-3 w-3" />
+                  Add Organizations
+                </Button>
+              )}
+              <Button
+                data-testid="refresh-repos-button"
+                aria-label="Refresh repository list from GitHub"
+                aria-busy={reposLoading}
+                variant="outline"
+                size="sm"
+                onClick={fetchRepos}
+                disabled={reposLoading}
+              >
+                {reposLoading && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                Refresh
+              </Button>
+            </div>
           </div>
 
           <div className="mb-4">
@@ -206,7 +226,19 @@ export default function DashboardPage() {
               })}
               {filteredRepos.length === 0 && !reposLoading && (
                 <div data-testid="repos-empty-state" role="status" className="py-8 text-center text-muted-foreground">
-                  {searchQuery ? 'No repositories match your search.' : 'No repositories found.'}
+                  <p>{searchQuery ? 'No repositories match your search.' : 'No repositories found.'}</p>
+                  {!searchQuery && manageUrl && (
+                    <p className="mt-2 text-xs">
+                      Missing repos from an organization?{' '}
+                      <button
+                        className="text-primary underline underline-offset-2 hover:text-primary/80"
+                        onClick={() => window.open(manageUrl, '_blank', 'noopener,noreferrer')}
+                      >
+                        Grant access to more organizations
+                      </button>{' '}
+                      on GitHub, then click Refresh.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

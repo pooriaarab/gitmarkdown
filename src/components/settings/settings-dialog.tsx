@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Settings, Type, Bot, Timer, Monitor, Sun, Moon, Minus, Plus, Key, Webhook, Copy, Trash2, Loader2, Plug, FileText, Pencil, Github, RefreshCw, CheckCircle2, XCircle, Eye, EyeOff, AlertTriangle, ChevronsUpDown } from 'lucide-react';
+import { Settings, Type, Bot, Timer, Monitor, Sun, Moon, Minus, Plus, Key, Webhook, Copy, Trash2, Loader2, Plug, FileText, Pencil, Github, RefreshCw, CheckCircle2, XCircle, Eye, EyeOff, AlertTriangle, ChevronsUpDown, ExternalLink, Building2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import {
@@ -227,6 +227,7 @@ function GitHubConnectionSection() {
     error?: string;
   }>({ loading: true, connected: false });
   const [reconnecting, setReconnecting] = useState(false);
+  const [manageUrl, setManageUrl] = useState<string | null>(null);
 
   const checkConnection = useCallback(async () => {
     if (!user) {
@@ -250,6 +251,13 @@ function GitHubConnectionSection() {
     checkConnection();
   }, [checkConnection]);
 
+  useEffect(() => {
+    fetch('/api/auth/github-manage-url')
+      .then((res) => res.json())
+      .then((data) => { if (data.manageUrl) setManageUrl(data.manageUrl); })
+      .catch(() => {});
+  }, []);
+
   const handleReconnect = async () => {
     setReconnecting(true);
     try {
@@ -260,6 +268,12 @@ function GitHubConnectionSection() {
       toast.error('Reconnection failed. Try signing out and back in.');
     } finally {
       setReconnecting(false);
+    }
+  };
+
+  const handleManageOrgs = () => {
+    if (manageUrl) {
+      window.open(manageUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -314,22 +328,52 @@ function GitHubConnectionSection() {
             )}
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReconnect}
-          disabled={reconnecting || status.loading}
-        >
-          {reconnecting ? (
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-          )}
-          {status.connected ? 'Refresh' : 'Connect'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReconnect}
+            disabled={reconnecting || status.loading}
+          >
+            {reconnecting ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            {status.connected ? 'Re-authorize' : 'Connect'}
+          </Button>
+        </div>
       </div>
       {!status.loading && !status.connected && status.error && (
         <p className="mt-2 text-xs text-muted-foreground">{status.error}</p>
+      )}
+
+      {/* Manage Organizations */}
+      {status.connected && manageUrl && (
+        <div className="mt-3 rounded-md border p-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-medium flex items-center gap-1.5">
+                <Building2 className="h-3.5 w-3.5" />
+                Organizations
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Grant access to additional GitHub organizations
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleManageOrgs}
+            >
+              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+              Manage Access
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            After granting access on GitHub, click &ldquo;Re-authorize&rdquo; above to refresh your token.
+          </p>
+        </div>
       )}
     </div>
   );
