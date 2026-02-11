@@ -227,7 +227,7 @@ function GitHubConnectionSection() {
     error?: string;
   }>({ loading: true, connected: false });
   const [reconnecting, setReconnecting] = useState(false);
-  const [manageUrl, setManageUrl] = useState<string | null>(null);
+  const [installUrl, setInstallUrl] = useState<string | null>(null);
 
   const checkConnection = useCallback(async () => {
     if (!user) {
@@ -254,7 +254,7 @@ function GitHubConnectionSection() {
   useEffect(() => {
     fetch('/api/auth/github-manage-url')
       .then((res) => res.json())
-      .then((data) => { if (data.manageUrl) setManageUrl(data.manageUrl); })
+      .then((data) => { if (data.installUrl) setInstallUrl(data.installUrl); })
       .catch(() => {});
   }, []);
 
@@ -271,9 +271,9 @@ function GitHubConnectionSection() {
     }
   };
 
-  const handleManageOrgs = () => {
-    if (manageUrl) {
-      window.open(manageUrl, '_blank', 'noopener,noreferrer');
+  const handleConfigureAccess = () => {
+    if (installUrl) {
+      window.open(installUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -348,30 +348,30 @@ function GitHubConnectionSection() {
         <p className="mt-2 text-xs text-muted-foreground">{status.error}</p>
       )}
 
-      {/* Manage Organizations */}
-      {status.connected && manageUrl && (
+      {/* Repository Access */}
+      {status.connected && installUrl && (
         <div className="mt-3 rounded-md border p-3">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5" />
-                Organizations
+                Repository Access
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Grant access to additional GitHub organizations
+                Install GitMarkdown on additional repos or organizations
               </p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={handleManageOrgs}
+              onClick={handleConfigureAccess}
             >
               <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-              Manage Access
+              Configure Access
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            After granting access on GitHub, click &ldquo;Re-authorize&rdquo; above to refresh your token.
+            After installing on new repos, click &ldquo;Refresh&rdquo; on the dashboard to see them.
           </p>
         </div>
       )}

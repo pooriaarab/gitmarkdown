@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  if (!clientId) {
+  const slug = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
+  if (!slug) {
     return NextResponse.json(
-      { error: 'GitHub OAuth not configured' },
+      { error: 'GitHub App not configured' },
       { status: 500 }
     );
   }
   return NextResponse.json({
-    manageUrl: `https://github.com/settings/connections/applications/${clientId}`,
+    installUrl: `https://github.com/apps/${slug}/installations/new`,
+    manageUrl: `https://github.com/settings/installations`,
   });
 }

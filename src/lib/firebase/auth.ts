@@ -8,10 +8,9 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
 
+// GitHub App tokens get permissions from the App's installation config,
+// not from OAuth scopes. No addScope() calls needed.
 const githubProvider = new GithubAuthProvider();
-githubProvider.addScope('repo');
-githubProvider.addScope('read:user');
-githubProvider.addScope('user:email');
 
 export async function signInWithGitHub() {
   const result = await signInWithPopup(auth, githubProvider);

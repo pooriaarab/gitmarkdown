@@ -15,9 +15,14 @@ function isGitHubAuthError(status: number, message: string): boolean {
   const lower = message.toLowerCase();
   return (
     lower.includes('bad credentials') ||
-    lower.includes('no github token') ||
-    lower.includes('resource not accessible')
+    lower.includes('no github token')
   );
+}
+
+function isGitHubInstallationError(status: number, message: string): boolean {
+  if (status !== 403) return false;
+  const lower = message.toLowerCase();
+  return lower.includes('resource not accessible');
 }
 
 function showReconnectToast() {
@@ -34,6 +39,28 @@ function showReconnectToast() {
         signInWithGitHub()
           .then(() => toast.success('GitHub reconnected'))
           .catch(() => toast.error('Reconnection failed. Try signing out and back in.'));
+      },
+    },
+  });
+}
+
+function showInstallationToast() {
+  const now = Date.now();
+  if (now - _lastAuthToast < AUTH_TOAST_COOLDOWN) return;
+  _lastAuthToast = now;
+
+  const slug = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
+  const installUrl = slug
+    ? `https://github.com/apps/${slug}/installations/new`
+    : 'https://github.com/settings/installations';
+
+  toast.error('GitHub App not installed on this repository', {
+    description: 'Install the GitMarkdown app to access this repo.',
+    duration: 15_000,
+    action: {
+      label: 'Install',
+      onClick: () => {
+        window.open(installUrl, '_blank', 'noopener,noreferrer');
       },
     },
   });
@@ -59,6 +86,8 @@ function useGitHubFetch() {
         const message = error.error || 'Request failed';
         if (isGitHubAuthError(res.status, message)) {
           showReconnectToast();
+        } else if (isGitHubInstallationError(res.status, message)) {
+          showInstallationToast();
         }
         throw new Error(message);
       }

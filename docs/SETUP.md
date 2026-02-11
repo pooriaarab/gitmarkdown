@@ -8,7 +8,7 @@ This guide walks you through setting up GitMarkdown from scratch, including all 
 - [1. Clone and Install](#1-clone-and-install)
 - [2. Create a Firebase Project](#2-create-a-firebase-project)
 - [3. Enable Firebase Authentication](#3-enable-firebase-authentication)
-- [4. Create a GitHub OAuth App](#4-create-a-github-oauth-app)
+- [4. Create a GitHub App](#4-create-a-github-app)
 - [5. Enable Cloud Firestore](#5-enable-cloud-firestore)
 - [6. Enable Realtime Database](#6-enable-realtime-database)
 - [7. Get Firebase Admin Credentials](#7-get-firebase-admin-credentials)
@@ -72,19 +72,31 @@ You'll fill in the values in the steps below.
 
 ---
 
-## 4. Create a GitHub OAuth App
+## 4. Create a GitHub App
 
-1. Go to [GitHub Developer Settings > OAuth Apps](https://github.com/settings/developers)
-2. Click **"New OAuth App"**
-3. Fill in:
-   - **Application name**: `GitMarkdown` (or anything you like)
+1. Go to [GitHub Developer Settings > GitHub Apps > New](https://github.com/settings/apps/new)
+2. Fill in:
+   - **GitHub App name**: `GitMarkdown` (or any unique name)
    - **Homepage URL**: `http://localhost:3000` (update to your production URL later)
-   - **Authorization callback URL**: `https://<YOUR_FIREBASE_PROJECT_ID>.firebaseapp.com/__/auth/handler`
+   - **Callback URL**: `https://<YOUR_FIREBASE_PROJECT_ID>.firebaseapp.com/__/auth/handler`
      - Replace `<YOUR_FIREBASE_PROJECT_ID>` with your actual Firebase project ID (e.g. `gitmarkdown-12345`)
      - You can find this in Firebase Console > Project Settings > General
-4. Click **Register application**
-5. Copy the **Client ID**
-6. Click **Generate a new client secret** and copy the **Client Secret**
+   - **Request user authorization (OAuth) during installation**: Check this box
+   - **Webhook**: Uncheck "Active" (not needed)
+3. Under **Permissions**, set:
+   - **Repository permissions**:
+     - Contents: **Read & write**
+     - Pull requests: **Read & write**
+     - Metadata: **Read-only** (auto-selected)
+     - Commit statuses: **Read-only**
+   - **Account permissions**:
+     - Email addresses: **Read-only**
+4. Under **Where can this GitHub App be installed?**, select **Any account**
+5. Click **Create GitHub App**
+6. On the app settings page:
+   - Copy the **Client ID**
+   - Click **Generate a new client secret** and copy the **Client Secret**
+   - Note the **app slug** from the URL (e.g. if the URL is `github.com/settings/apps/gitmarkdownapp`, the slug is `gitmarkdownapp`)
 7. Go back to **Firebase Console > Authentication > Sign-in method > GitHub**:
    - Paste the **Client ID** and **Client Secret**
    - Click **Save**
@@ -93,6 +105,7 @@ You'll fill in the values in the steps below.
 ```bash
 GITHUB_CLIENT_ID=your_client_id_here
 GITHUB_CLIENT_SECRET=your_client_secret_here
+NEXT_PUBLIC_GITHUB_APP_SLUG=your_app_slug_here
 ```
 
 ### Add Authorized Domains
@@ -221,9 +234,10 @@ FIREBASE_ADMIN_PROJECT_ID=your-project
 FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----\n"
 
-# GitHub OAuth
+# GitHub App
 GITHUB_CLIENT_ID=Iv1.abc123
 GITHUB_CLIENT_SECRET=abc123...
+NEXT_PUBLIC_GITHUB_APP_SLUG=gitmarkdownapp
 
 # AI Keys
 ANTHROPIC_API_KEY=sk-ant-...
@@ -420,7 +434,7 @@ netlify deploy --prod
 After deploying, update these settings:
 
 1. **`.env` on Netlify**: Set `NEXT_PUBLIC_APP_URL` to your production URL (e.g. `https://gitmarkdown-app.netlify.app`)
-2. **GitHub OAuth App**: Update the **Homepage URL** to your production URL
+2. **GitHub App**: Update the **Homepage URL** to your production URL
 3. **Firebase Console > Authentication > Settings > Authorized domains**: Add your Netlify domain (e.g. `gitmarkdown-app.netlify.app`)
 4. **`FIREBASE_ADMIN_PRIVATE_KEY` on Netlify**: Make sure the private key is pasted with actual newlines. Netlify's UI handles this correctly if you paste the raw key including `\n` characters.
 
@@ -452,8 +466,8 @@ Same as above — Firestore rules or missing composite index. Check the browser 
 
 ### GitHub sign-in fails or loops
 
-- Verify the **callback URL** in your GitHub OAuth app matches exactly: `https://<PROJECT_ID>.firebaseapp.com/__/auth/handler`
-- Verify the **Client ID** and **Client Secret** are entered in both `.env.local` AND in Firebase Console > Auth > GitHub.
+- Verify the **callback URL** in your GitHub App matches exactly: `https://<PROJECT_ID>.firebaseapp.com/__/auth/handler`
+- Verify the **Client ID** and **Client Secret** from your GitHub App are entered in both `.env.local` AND in Firebase Console > Auth > GitHub.
 - Check that `localhost` (for dev) or your production domain is in Firebase Auth > Authorized domains.
 
 ### "Firebase: Error (auth/configuration-not-found)"

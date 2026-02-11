@@ -62,9 +62,9 @@ Open [http://localhost:3000](http://localhost:3000).
 6. **Generate Admin SDK key** (Project Settings > Service Accounts > Generate new private key) - copy `project_id`, `client_email`, `private_key` to `.env.local`
 7. **Apply security rules** - see [Security Rules](#security-rules)
 
-### GitHub OAuth Setup
+### GitHub App Setup
 
-1. Go to [GitHub Developer Settings > OAuth Apps > New](https://github.com/settings/applications/new)
+1. Go to [GitHub Developer Settings > GitHub Apps > New](https://github.com/settings/apps/new)
 2. Set:
    - **Homepage URL**: `http://localhost:3000`
    - **Callback URL**: `https://<YOUR_FIREBASE_PROJECT_ID>.firebaseapp.com/__/auth/handler`
@@ -93,8 +93,9 @@ See [`.env.example`](.env.example) for the full list with inline comments.
 | `FIREBASE_ADMIN_PROJECT_ID` | Admin SDK project ID | Yes |
 | `FIREBASE_ADMIN_CLIENT_EMAIL` | Admin SDK service account email | Yes |
 | `FIREBASE_ADMIN_PRIVATE_KEY` | Admin SDK private key (wrap in quotes) | Yes |
-| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID | Yes |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret | Yes |
+| `GITHUB_CLIENT_ID` | GitHub App client ID | Yes |
+| `GITHUB_CLIENT_SECRET` | GitHub App client secret | Yes |
+| `NEXT_PUBLIC_GITHUB_APP_SLUG` | GitHub App slug (e.g. `gitmarkdownapp`) | Yes |
 | `GITHUB_TOKEN_ENCRYPTION_KEY` | Encryption key for stored tokens (`openssl rand -hex 32`) | Recommended |
 | `ANTHROPIC_API_KEY` | Anthropic API key | No* |
 | `OPENAI_API_KEY` | OpenAI API key | No* |
@@ -245,7 +246,7 @@ GitMarkdown can be deployed on any platform that supports Next.js (Netlify, Verc
 npm run build
 ```
 
-Set all environment variables from `.env.local` in your hosting dashboard. Update `NEXT_PUBLIC_APP_URL` and the GitHub OAuth callback URL to match your production domain.
+Set all environment variables from `.env.local` in your hosting dashboard. Update `NEXT_PUBLIC_APP_URL` and the GitHub App callback URL to match your production domain.
 
 ## Contributing
 
