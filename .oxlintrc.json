@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "unicorn", "oxc"],
+  "categories": { "correctness": "warn", "suspicious": "warn", "perf": "warn", "pedantic": "off", "style": "off", "restriction": "off", "nursery": "off" },
+  "rules": {
+    "complexity": ["warn", { "max": 10 }],
+    "max-lines": ["warn", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["warn", { "max": 50, "skipBlankLines": true, "skipComments": true }],
+    "max-params": ["warn", { "max": 4 }],
+    "max-depth": ["warn", { "max": 4 }],
+    "max-nested-callbacks": ["warn", { "max": 4 }],
+    "no-var": "warn", "prefer-const": "warn", "eqeqeq": "warn", "no-debugger": "warn",
+    "typescript/no-explicit-any": "warn", "typescript/no-non-null-assertion": "warn", "import/no-cycle": "warn"
+  },
+  "overrides": [
+    { "files": ["**/*.test.ts","**/*.test.tsx","**/*.spec.ts","**/*.spec.tsx","**/__tests__/**"], "rules": { "complexity":"off","max-lines":"off","max-lines-per-function":"off","max-depth":"off","max-nested-callbacks":"off","typescript/no-explicit-any":"off","typescript/no-non-null-assertion":"off" } },
+    { "files": ["scripts/**","**/scripts/**","**/*.config.*"], "rules": { "max-lines-per-function":"off","complexity":"off" } }
+  ]
+}
