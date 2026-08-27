@@ -1,0 +1,13 @@
+name: oxlint
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  oxlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: oxlint (agent budgets — warn-only, ratchet to error later)
+        run: bunx oxlint@^1 --config .oxlintrc.json
