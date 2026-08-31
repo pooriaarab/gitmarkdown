@@ -1,0 +1,87 @@
+name: pr-standards
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: pr-standards-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# This job waits on the GitHub API and does no compute, so it takes the
+# smallest runner. Private pooriaarab repos run every job on Ubicloud; the
+# self-hosted fleet is retired and `ubuntu-latest` is not the house default.
+jobs:
+  pr-standards:
+    name: PR standards
+    runs-on: ubicloud-standard-2
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The check lives in pooriaarab/scripts, not here. One engine, one set of
+      # rules, and a fix reaches every repo without editing sixty workflows.
+      #
+      # It is fetched from the moving tag `pr-standards-v1`, not from `main` and
+      # not from a bare SHA. Three options, and this is the least bad:
+      #
+      #   main       churns on every merge, so every repo runs whatever was
+      #              pushed minutes ago. Rejected.
+      #   a SHA      immutable, but shipping one engine fix then means opening
+      #              sixty pull requests to bump sixty URLs. Rejected.
+      #   a tag      the fleet updates when the tag is deliberately moved, which
+      #              makes releasing an act rather than a side effect of merging.
+      #
+      # `pr-standards-v1.0.0` and friends stay immutable, so pin one of those in
+      # place of the tag below where a repo needs the rules frozen.
+      #
+      # Two files, not one: `pr-standards` is a thin launcher and the engine
+      # lives in `pr-standards.mjs` beside it. Fetching only the launcher gets
+      # you a job that fails on a missing import.
+      #
+      # One request for the whole tag, rather than resolving it through the API
+      # and then fetching each file. That is not only shorter:
+      #
+      #   - The launcher and the engine cannot come from two revisions, because
+      #     they arrive in one archive. Resolving a SHA first bought the same
+      #     property at the cost of an extra call.
+      #   - No authenticated API call, so nothing here spends the account's
+      #     quota. That matters at fleet scale: after the rollout every pull
+      #     request on 63 repos ran the old `gh api` line, which is a good way
+      #     to induce the rate limit the check is then judged by. A secondary
+      #     limit answers 403 while `gh api rate_limit` still reports a full
+      #     quota, so the check went red for a reason with nothing to do with
+      #     the pull request, and the reason it gave was misleading.
+      #   - pooriaarab/scripts is public, so the archive needs no token.
+      #     That is a dependency, not a detail: making scripts private takes CI
+      #     down on every repo that installed this workflow, all at once, and
+      #     codeload answers a permissions decision with what reads as a network
+      #     error. Turn the repo private only together with an auth header here.
+      #
+      # --retry-all-errors is what makes the retry cover an HTTP error rather
+      # than only a connection failure.
+      #
+      # Downloaded to a file, not piped straight into tar: curl restarts a
+      # retried attempt from byte zero, but a pipe has no seek, so a
+      # connection that drops mid-archive would leave the truncated first
+      # attempt's bytes sitting in front of the successful retry's, and tar
+      # would extract that concatenation instead of the archive.
+      - name: Fetch the checker
+        run: |
+          mkdir -p /tmp/prs
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsSL \
+            -o /tmp/pr-standards.tar.gz \
+            "https://codeload.github.com/pooriaarab/scripts/tar.gz/refs/tags/pr-standards-v1"
+          tar -xzf /tmp/pr-standards.tar.gz -C /tmp/prs --strip-components=1
+          chmod +x /tmp/prs/pr-standards
+          # A truncated archive must fail here, not later as a rule violation.
+          node /tmp/prs/pr-standards --selfcheck
+
+      - name: Check branch, title, description, and size
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node /tmp/prs/pr-standards pr --repo "$GITHUB_REPOSITORY" --number "${{ github.event.pull_request.number }}"
