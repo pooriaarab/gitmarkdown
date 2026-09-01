@@ -12,15 +12,20 @@ const firebaseConfig = {
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || undefined,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export function getFirebaseApp() {
+  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export function getClientAuth() {
+  return getAuth(getFirebaseApp());
+}
+
+export function getClientDb() {
+  return getFirestore(getFirebaseApp());
+}
 
 // Lazy-init RTDB to avoid build-time crash when databaseURL is not set
 export async function getRtdb() {
   const { getDatabase } = await import('firebase/database');
-  return getDatabase(app);
+  return getDatabase(getFirebaseApp());
 }
-
-export default app;

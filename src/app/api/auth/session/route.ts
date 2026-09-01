@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import crypto from 'crypto';
 
 const ENCRYPTION_KEY = process.env.GITHUB_TOKEN_ENCRYPTION_KEY
@@ -39,14 +39,14 @@ export async function POST(request: NextRequest) {
     const { uid, githubToken, idToken } = await request.json();
 
     // Verify the Firebase ID token
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const decodedToken = await (await getAdminAuth()).verifyIdToken(idToken);
     if (decodedToken.uid !== uid) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Encrypt and store the GitHub token
     const encryptedToken = encrypt(githubToken);
-    await adminDb.collection('users').doc(uid).set(
+    await (await getAdminDb()).collection('users').doc(uid).set(
       { encryptedGithubToken: encryptedToken },
       { merge: true }
     );

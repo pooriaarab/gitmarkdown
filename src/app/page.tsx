@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { onAuthChange } from '@/lib/firebase/auth';
 import {
   GitBranch,
   Users,
@@ -601,8 +600,18 @@ export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((user) => setIsLoggedIn(!!user));
-    return () => unsubscribe();
+    let unsubscribe: (() => void) | undefined;
+    let disposed = false;
+
+    void import('@/lib/firebase/auth').then(({ onAuthChange }) => {
+      if (disposed) return;
+      unsubscribe = onAuthChange((user) => setIsLoggedIn(!!user));
+    });
+
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+    };
   }, []);
 
   const ctaHref = isLoggedIn ? '/dashboard' : '/login';

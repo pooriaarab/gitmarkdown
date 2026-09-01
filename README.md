@@ -240,10 +240,12 @@ src/
 
 ## Deployment
 
-GitMarkdown can be deployed on any platform that supports Next.js (Netlify, Vercel, etc.).
+GitMarkdown deploys to Cloudflare Workers through Vinext.
 
 ```bash
-npm run build
+npm run build:vinext
+npx wrangler deploy --dry-run
+npm run deploy:vinext
 ```
 
 Set all environment variables from `.env.local` in your hosting dashboard. Update `NEXT_PUBLIC_APP_URL` and the GitHub App callback URL to match your production domain.

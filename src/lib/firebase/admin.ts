@@ -1,23 +1,41 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import type { App } from 'firebase-admin/app';
+import type { Auth } from 'firebase-admin/auth';
+import type { Firestore } from 'firebase-admin/firestore';
 
-function getAdminApp() {
-  if (getApps().length > 0) {
-    return getApps()[0];
-  }
+let adminApp: Promise<App> | undefined;
+let adminDb: Promise<Firestore> | undefined;
 
-  return initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
+async function getAdminApp(): Promise<App> {
+  adminApp ??= import('firebase-admin/app').then(
+    ({ cert, getApps, initializeApp }) =>
+      getApps()[0] ??
+      initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+      }),
+  );
+
+  return adminApp;
 }
 
-const adminApp = getAdminApp();
+export async function getAdminAuth(): Promise<Auth> {
+  const [{ getAuth }, app] = await Promise.all([
+    import('firebase-admin/auth'),
+    getAdminApp(),
+  ]);
+  return getAuth(app);
+}
 
-export const adminAuth = getAuth(adminApp);
-export const adminDb = getFirestore(adminApp);
-export default adminApp;
+export async function getAdminDb(): Promise<Firestore> {
+  adminDb ??= Promise.all([
+    import('firebase-admin/firestore'),
+    getAdminApp(),
+  ]).then(([{ initializeFirestore }, app]) =>
+    initializeFirestore(app, { preferRest: true }),
+  );
+
+  return adminDb;
+}
