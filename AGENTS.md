@@ -29,3 +29,9 @@ Settings for this repo are in `.github/pr-standards.json`. The standard is at
 https://github.com/pooriaarab/scripts/blob/main/pr-standards.md
 
 <!-- pr-standards:end -->
+
+## Product context
+
+Read `.agents/brand.md` before writing product copy or visual assets.
+
+Read `.agents/design.md` before changing the interface or design tokens.
