@@ -8,7 +8,7 @@
  */
 
 import crypto from 'crypto';
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { decrypt } from '@/app/api/auth/session/route';
 
 const MAX_ATTEMPTS = 3;
@@ -78,7 +78,7 @@ export async function dispatchWebhookEvent(
   data: Record<string, unknown>,
 ): Promise<void> {
   try {
-    const snap = await adminDb
+    const snap = await (await getAdminDb())
       .collection('webhooks')
       .doc(userId)
       .collection('registrations')
@@ -165,9 +165,8 @@ export async function dispatchWebhookEvent(
       }
     });
 
-    // Fire-and-forget — don't await at the top level, but let individual
-    // deliveries run concurrently.
-    Promise.allSettled(deliveries).catch(() => {});
+    // Keep the Worker alive until every concurrent delivery settles.
+    await Promise.allSettled(deliveries);
   } catch (err) {
     console.error('[Webhook] Failed to load webhooks:', err);
   }

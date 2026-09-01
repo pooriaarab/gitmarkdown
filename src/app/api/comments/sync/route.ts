@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { createOctokitClient } from '@/lib/github/client';
 import { listReviewComments, createReviewComment, fetchThreadDetails } from '@/lib/github/review-comments';
 import { githubReactionToEmoji } from '@/lib/github/position-mapping';
@@ -26,8 +26,11 @@ export async function POST(request: NextRequest) {
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const decoded = await (await getAdminAuth()).verifyIdToken(idToken);
+    const userDoc = await (await getAdminDb())
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
     const encryptedToken = userDoc.data()?.encryptedGithubToken;
     if (!encryptedToken) {
       return NextResponse.json({ error: 'No GitHub token' }, { status: 401 });
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
         filePath
       );
 
-      const commentsRef = adminDb.collection('comments');
+      const commentsRef = (await getAdminDb()).collection('comments');
       let imported = 0;
       let resolved = 0;
 
@@ -211,7 +214,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, imported, resolved });
     } else {
       // Push local Firestore comments to GitHub PR
-      const commentsRef = adminDb.collection('comments');
+      const commentsRef = (await getAdminDb()).collection('comments');
       const snapshot = await commentsRef
         .where('repoFullName', '==', repoFullName)
         .where('filePath', '==', filePath)
