@@ -1,0 +1,17 @@
+{
+  "min-tokens": 100,
+  "threshold": 5,
+  "mode": "mild",
+  "format": ["typescript", "tsx", "javascript", "jsx"],
+  "ignore": [
+    "**/__tests__/**",
+    "**/*.{test,spec}.{ts,tsx,js,jsx}",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/vendor/**",
+    "**/*.min.js"
+  ]
+}
