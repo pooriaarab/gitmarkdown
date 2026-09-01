@@ -15,7 +15,7 @@ import {
 } from '@/lib/github/contents';
 import { listBranches } from '@/lib/github/branches';
 import { listPullRequests, createPullRequest } from '@/lib/github/pulls';
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 
 // Max file size allowed for read_file (10 MB)
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -420,7 +420,7 @@ function buildMcpServer(): McpServer {
         const repoFullName = `${args.owner}/${args.repo}`;
         // Query scoped to a specific file path — avoids the need for a
         // composite Firestore index on [repoFullName, createdAt].
-        const snapshot = await adminDb
+        const snapshot = await (await getAdminDb())
           .collection('comments')
           .where('repoFullName', '==', repoFullName)
           .where('filePath', '==', args.path)

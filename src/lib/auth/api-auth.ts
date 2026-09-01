@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { decrypt } from '@/app/api/auth/session/route';
 
 export interface AuthResult {
@@ -33,8 +33,8 @@ export async function authenticateRequest(
   if (authHeader?.startsWith('Bearer ')) {
     try {
       const idToken = authHeader.slice(7);
-      const decoded = await adminAuth.verifyIdToken(idToken);
-      const userDoc = await adminDb
+      const decoded = await (await getAdminAuth()).verifyIdToken(idToken);
+      const userDoc = await (await getAdminDb())
         .collection('users')
         .doc(decoded.uid)
         .get();
@@ -82,7 +82,7 @@ export async function authenticateRequest(
     // index on the 'keys' collection group with the 'keyHash' field.
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
     try {
-      const snapshot = await adminDb
+      const snapshot = await (await getAdminDb())
         .collectionGroup('keys')
         .where('keyHash', '==', keyHash)
         .limit(1)
@@ -98,7 +98,7 @@ export async function authenticateRequest(
             .catch(() => {});
 
           // Look up user's GitHub token
-          const userDoc = await adminDb
+          const userDoc = await (await getAdminDb())
             .collection('users')
             .doc(userId)
             .get();

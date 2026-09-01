@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { authenticateRequest } from '@/lib/auth/api-auth';
 import { checkRateLimit } from '@/lib/auth/rate-limit';
 import { encrypt } from '@/app/api/auth/session/route';
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     const rateLimited = checkRateLimit(auth.userId, { maxTokens: 30, refillRate: 0.5 });
     if (rateLimited) return rateLimited;
 
-    const snap = await adminDb
+    const snap = await (await getAdminDb())
       .collection('webhooks')
       .doc(auth.userId)
       .collection('registrations')
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check webhook registration limit
-    const registrationsRef = adminDb
+    const registrationsRef = (await getAdminDb())
       .collection('webhooks')
       .doc(auth.userId)
       .collection('registrations');
@@ -221,7 +221,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const docRef = adminDb
+    const docRef = (await getAdminDb())
       .collection('webhooks')
       .doc(auth.userId)
       .collection('registrations')

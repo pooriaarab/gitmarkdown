@@ -6,19 +6,20 @@ import {
   type User,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from './config';
+import { getClientAuth, getClientDb } from './config';
 
 // GitHub App tokens get permissions from the App's installation config,
 // not from OAuth scopes. No addScope() calls needed.
-const githubProvider = new GithubAuthProvider();
-
 export async function signInWithGitHub() {
-  const result = await signInWithPopup(auth, githubProvider);
+  const result = await signInWithPopup(
+    getClientAuth(),
+    new GithubAuthProvider()
+  );
   const credential = GithubAuthProvider.credentialFromResult(result);
   const githubToken = credential?.accessToken;
 
   if (result.user && githubToken) {
-    const userRef = doc(db, 'users', result.user.uid);
+    const userRef = doc(getClientDb(), 'users', result.user.uid);
     const userSnap = await getDoc(userRef);
 
     const additionalInfo = result.user.providerData[0];
@@ -53,11 +54,9 @@ export async function signInWithGitHub() {
 }
 
 export async function signOut() {
-  await firebaseSignOut(auth);
+  await firebaseSignOut(getClientAuth());
 }
 
 export function onAuthChange(callback: (user: User | null) => void) {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(getClientAuth(), callback);
 }
-
-export { auth };

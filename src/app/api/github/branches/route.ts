@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { createOctokitClient } from '@/lib/github/client';
 import { listBranches, createBranch } from '@/lib/github/branches';
 import { decrypt } from '@/app/api/auth/session/route';
@@ -20,8 +20,11 @@ export async function GET(request: NextRequest) {
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const decoded = await (await getAdminAuth()).verifyIdToken(idToken);
+    const userDoc = await (await getAdminDb())
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
     const encryptedToken = userDoc.data()?.encryptedGithubToken;
     if (!encryptedToken) {
       return NextResponse.json({ error: 'No GitHub token' }, { status: 401 });
@@ -50,8 +53,11 @@ export async function POST(request: NextRequest) {
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const decoded = await (await getAdminAuth()).verifyIdToken(idToken);
+    const userDoc = await (await getAdminDb())
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
     const encryptedToken = userDoc.data()?.encryptedGithubToken;
     if (!encryptedToken) {
       return NextResponse.json({ error: 'No GitHub token' }, { status: 401 });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing params' }, { status: 400 });
     }
 
-    const commentsRef = adminDb
+    const commentsRef = (await getAdminDb())
       .collection('workspaces')
       .doc(workspaceId)
       .collection('files')
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing params' }, { status: 400 });
     }
 
-    const commentsRef = adminDb
+    const commentsRef = (await getAdminDb())
       .collection('workspaces')
       .doc(workspaceId)
       .collection('files')

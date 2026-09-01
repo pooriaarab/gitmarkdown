@@ -12,17 +12,15 @@ import {
   onSnapshot,
   serverTimestamp,
   Timestamp,
-  type DocumentData,
-  type QueryConstraint,
   addDoc,
   limit,
 } from 'firebase/firestore';
-import { db } from './config';
+import { getClientDb } from './config';
 import type { Workspace, FileNode, Comment } from '@/types';
 
 // Workspaces
 export async function createWorkspace(data: Omit<Workspace, 'id' | 'createdAt' | 'updatedAt'>) {
-  const ref = doc(collection(db, 'workspaces'));
+  const ref = doc(collection(getClientDb(), 'workspaces'));
   await setDoc(ref, {
     ...data,
     createdAt: serverTimestamp(),
@@ -32,14 +30,14 @@ export async function createWorkspace(data: Omit<Workspace, 'id' | 'createdAt' |
 }
 
 export async function getWorkspace(id: string): Promise<Workspace | null> {
-  const snap = await getDoc(doc(db, 'workspaces', id));
+  const snap = await getDoc(doc(getClientDb(), 'workspaces', id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() } as Workspace;
 }
 
 export async function getUserWorkspaces(uid: string): Promise<Workspace[]> {
   const q = query(
-    collection(db, 'workspaces'),
+    collection(getClientDb(), 'workspaces'),
     where(`members.${uid}.role`, 'in', ['owner', 'editor', 'viewer'])
   );
   const snap = await getDocs(q);
@@ -47,7 +45,7 @@ export async function getUserWorkspaces(uid: string): Promise<Workspace[]> {
 }
 
 export async function updateWorkspace(id: string, data: Partial<Workspace>) {
-  await updateDoc(doc(db, 'workspaces', id), {
+  await updateDoc(doc(getClientDb(), 'workspaces', id), {
     ...data,
     updatedAt: serverTimestamp(),
   });
@@ -56,7 +54,7 @@ export async function updateWorkspace(id: string, data: Partial<Workspace>) {
 // Files
 export async function saveFile(workspaceId: string, file: Omit<FileNode, 'id'>) {
   const fileId = file.path.replace(/\//g, '__');
-  await setDoc(doc(db, 'workspaces', workspaceId, 'files', fileId), {
+  await setDoc(doc(getClientDb(), 'workspaces', workspaceId, 'files', fileId), {
     ...file,
     updatedAt: serverTimestamp(),
   });
@@ -65,13 +63,13 @@ export async function saveFile(workspaceId: string, file: Omit<FileNode, 'id'>) 
 
 export async function getFile(workspaceId: string, filePath: string): Promise<FileNode | null> {
   const fileId = filePath.replace(/\//g, '__');
-  const snap = await getDoc(doc(db, 'workspaces', workspaceId, 'files', fileId));
+  const snap = await getDoc(doc(getClientDb(), 'workspaces', workspaceId, 'files', fileId));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() } as FileNode;
 }
 
 export async function getWorkspaceFiles(workspaceId: string): Promise<FileNode[]> {
-  const snap = await getDocs(collection(db, 'workspaces', workspaceId, 'files'));
+  const snap = await getDocs(collection(getClientDb(), 'workspaces', workspaceId, 'files'));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as FileNode);
 }
 
@@ -82,7 +80,7 @@ export async function addComment(
   comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>
 ) {
   const ref = await addDoc(
-    collection(db, 'workspaces', workspaceId, 'files', fileId, 'comments'),
+    collection(getClientDb(), 'workspaces', workspaceId, 'files', fileId, 'comments'),
     {
       ...comment,
       createdAt: serverTimestamp(),
@@ -94,7 +92,7 @@ export async function addComment(
 
 export async function getComments(workspaceId: string, fileId: string): Promise<Comment[]> {
   const q = query(
-    collection(db, 'workspaces', workspaceId, 'files', fileId, 'comments'),
+    collection(getClientDb(), 'workspaces', workspaceId, 'files', fileId, 'comments'),
     orderBy('createdAt', 'asc')
   );
   const snap = await getDocs(q);
@@ -107,7 +105,7 @@ export function subscribeToComments(
   callback: (comments: Comment[]) => void
 ) {
   const q = query(
-    collection(db, 'workspaces', workspaceId, 'files', fileId, 'comments'),
+    collection(getClientDb(), 'workspaces', workspaceId, 'files', fileId, 'comments'),
     orderBy('createdAt', 'asc')
   );
   return onSnapshot(q, (snap) => {
@@ -123,23 +121,23 @@ export async function updateComment(
   data: Partial<Comment>
 ) {
   await updateDoc(
-    doc(db, 'workspaces', workspaceId, 'files', fileId, 'comments', commentId),
+    doc(getClientDb(), 'workspaces', workspaceId, 'files', fileId, 'comments', commentId),
     { ...data, updatedAt: serverTimestamp() }
   );
 }
 
 export async function deleteComment(workspaceId: string, fileId: string, commentId: string) {
-  await deleteDoc(doc(db, 'workspaces', workspaceId, 'files', fileId, 'comments', commentId));
+  await deleteDoc(doc(getClientDb(), 'workspaces', workspaceId, 'files', fileId, 'comments', commentId));
 }
 
 // Versions
 export async function saveVersion(workspaceId: string, version: { sha: string; message: string; author: string; authorAvatar?: string; date: string; filesChanged: string[] }) {
-  await setDoc(doc(db, 'workspaces', workspaceId, 'versions', version.sha), version);
+  await setDoc(doc(getClientDb(), 'workspaces', workspaceId, 'versions', version.sha), version);
 }
 
 export async function getVersions(workspaceId: string, maxResults = 50) {
   const q = query(
-    collection(db, 'workspaces', workspaceId, 'versions'),
+    collection(getClientDb(), 'workspaces', workspaceId, 'versions'),
     orderBy('date', 'desc'),
     limit(maxResults)
   );
@@ -158,7 +156,7 @@ export function subscribeToFileComments(
   filePath: string,
   onUpdate: (comments: Comment[]) => void
 ) {
-  const commentsRef = collection(db, 'comments');
+  const commentsRef = collection(getClientDb(), 'comments');
   const q = query(
     commentsRef,
     where('repoFullName', '==', `${owner}/${repo}`),
@@ -183,7 +181,7 @@ export async function addFileComment(
   filePath: string,
   comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>
 ) {
-  const commentsRef = collection(db, 'comments');
+  const commentsRef = collection(getClientDb(), 'comments');
   return addDoc(commentsRef, {
     ...comment,
     repoFullName: `${owner}/${repo}`,
@@ -197,7 +195,7 @@ export async function updateFileComment(
   commentId: string,
   updates: Partial<Comment>
 ) {
-  const commentRef = doc(db, 'comments', commentId);
+  const commentRef = doc(getClientDb(), 'comments', commentId);
   return updateDoc(commentRef, {
     ...updates,
     updatedAt: serverTimestamp(),
@@ -205,21 +203,21 @@ export async function updateFileComment(
 }
 
 export async function deleteFileComment(commentId: string) {
-  const commentRef = doc(db, 'comments', commentId);
+  const commentRef = doc(getClientDb(), 'comments', commentId);
   return deleteDoc(commentRef);
 }
 
 // ── User Settings (synced across devices) ──────────────────────────────
 
 export async function getUserSettings(uid: string): Promise<Record<string, unknown> | null> {
-  const snap = await getDoc(doc(db, 'userSettings', uid));
+  const snap = await getDoc(doc(getClientDb(), 'userSettings', uid));
   if (!snap.exists()) return null;
   return snap.data();
 }
 
 export async function saveUserSettings(uid: string, settings: Record<string, unknown>) {
   await setDoc(
-    doc(db, 'userSettings', uid),
+    doc(getClientDb(), 'userSettings', uid),
     { ...settings, updatedAt: serverTimestamp() },
     { merge: true }
   );
@@ -241,7 +239,7 @@ export async function createAIChat(
   userId: string,
   data: { repoFullName: string; title: string; messages: string }
 ) {
-  const ref = await addDoc(collection(db, 'users', userId, 'aiChats'), {
+  const ref = await addDoc(collection(getClientDb(), 'users', userId, 'aiChats'), {
     ...data,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -254,7 +252,7 @@ export async function updateAIChat(
   chatId: string,
   data: Partial<{ title: string; messages: string }>
 ) {
-  await updateDoc(doc(db, 'users', userId, 'aiChats', chatId), {
+  await updateDoc(doc(getClientDb(), 'users', userId, 'aiChats', chatId), {
     ...data,
     updatedAt: serverTimestamp(),
   });
@@ -262,7 +260,7 @@ export async function updateAIChat(
 
 export async function getAIChats(userId: string): Promise<AIChat[]> {
   const q = query(
-    collection(db, 'users', userId, 'aiChats'),
+    collection(getClientDb(), 'users', userId, 'aiChats'),
     orderBy('updatedAt', 'desc'),
     limit(50)
   );
@@ -282,7 +280,7 @@ export async function getAIChats(userId: string): Promise<AIChat[]> {
 }
 
 export async function deleteAIChat(userId: string, chatId: string) {
-  await deleteDoc(doc(db, 'users', userId, 'aiChats', chatId));
+  await deleteDoc(doc(getClientDb(), 'users', userId, 'aiChats', chatId));
 }
 
 // ── AI Personas ────────────────────────────────────────────────────────────
@@ -300,7 +298,7 @@ export async function createPersona(
   userId: string,
   data: { name: string; description: string; instructions: string; avatar: string }
 ) {
-  const ref = await addDoc(collection(db, 'users', userId, 'personas'), {
+  const ref = await addDoc(collection(getClientDb(), 'users', userId, 'personas'), {
     ...data,
     createdAt: serverTimestamp(),
   });
@@ -309,7 +307,7 @@ export async function createPersona(
 
 export async function getPersonas(userId: string): Promise<AIPersonaDoc[]> {
   const q = query(
-    collection(db, 'users', userId, 'personas'),
+    collection(getClientDb(), 'users', userId, 'personas'),
     orderBy('createdAt', 'asc')
   );
   const snap = await getDocs(q);
@@ -331,11 +329,9 @@ export async function updatePersona(
   personaId: string,
   data: Partial<{ name: string; description: string; instructions: string; avatar: string }>
 ) {
-  await updateDoc(doc(db, 'users', userId, 'personas', personaId), data);
+  await updateDoc(doc(getClientDb(), 'users', userId, 'personas', personaId), data);
 }
 
 export async function deletePersona(userId: string, personaId: string) {
-  await deleteDoc(doc(db, 'users', userId, 'personas', personaId));
+  await deleteDoc(doc(getClientDb(), 'users', userId, 'personas', personaId));
 }
-
-export { db };

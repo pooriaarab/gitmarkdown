@@ -18,7 +18,7 @@ This guide walks you through setting up GitMarkdown from scratch, including all 
 - [11. Apply Security Rules](#11-apply-security-rules)
 - [12. Create Firestore Indexes](#12-create-firestore-indexes)
 - [13. Run Locally](#13-run-locally)
-- [14. Deploy to Netlify](#14-deploy-to-netlify)
+- [14. Deploy to Cloudflare Workers](#14-deploy-to-cloudflare-workers)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -113,7 +113,7 @@ NEXT_PUBLIC_GITHUB_APP_SLUG=your_app_slug_here
 While in Firebase Authentication:
 1. Go to the **Settings** tab > **Authorized domains**
 2. Make sure `localhost` is listed (it should be by default)
-3. Later, add your production domain (e.g. `gitmarkdown-app.netlify.app`)
+3. Later, add your production domain (for example, `<worker>.workers.dev`)
 
 ---
 
@@ -407,49 +407,24 @@ Open [http://localhost:3000](http://localhost:3000). You should see the landing 
 
 ---
 
-## 14. Deploy to Netlify
+## 14. Deploy to Cloudflare Workers
 
-### Option A: Netlify UI (recommended)
-
-1. Push your code to GitHub (make sure `.env.local` is in `.gitignore`)
-2. Go to [Netlify](https://app.netlify.com/) and click **"Add new site" > "Import an existing project"**
-3. Connect your GitHub repo
-4. Configure build settings:
-   - **Build command**: `npm run build`
-   - **Publish directory**: `.next`
-5. Go to **Site settings > Environment variables** and add all variables from your `.env.local`
-6. Click **Deploy site**
-
-### Option B: Netlify CLI
+Add `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY`, and `GITHUB_TOKEN_ENCRYPTION_KEY` as Worker secrets.
+Use the Cloudflare dashboard or `npx wrangler secret put --config wrangler.jsonc <NAME>`. Load `NEXT_PUBLIC_*` values during builds.
 
 ```bash
-npm install -g netlify-cli
-netlify login
-netlify init        # Link to your repo
-netlify deploy --prod
+npm run build:vinext
+npx wrangler deploy --dry-run
+npm run deploy:vinext
 ```
 
 ### Post-Deploy Checklist
 
 After deploying, update these settings:
 
-1. **`.env` on Netlify**: Set `NEXT_PUBLIC_APP_URL` to your production URL (e.g. `https://gitmarkdown-app.netlify.app`)
-2. **GitHub App**: Update the **Homepage URL** to your production URL
-3. **Firebase Console > Authentication > Settings > Authorized domains**: Add your Netlify domain (e.g. `gitmarkdown-app.netlify.app`)
-4. **`FIREBASE_ADMIN_PRIVATE_KEY` on Netlify**: Make sure the private key is pasted with actual newlines. Netlify's UI handles this correctly if you paste the raw key including `\n` characters.
-
-### netlify.toml
-
-Make sure this file exists in your project root:
-
-```toml
-[build]
-  command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-```
+1. Set `NEXT_PUBLIC_APP_URL` and the GitHub App homepage to the `workers.dev` URL.
+2. Complete a Firebase sign-in, then load one repository to verify Firestore access.
+3. Attach a custom domain only after its Cloudflare zone exists.
 
 ---
 
@@ -482,7 +457,7 @@ Same as above — Firestore rules or missing composite index. Check the browser 
 ### `FIREBASE_ADMIN_PRIVATE_KEY` errors in production
 
 - The private key contains newlines. In `.env.local`, wrap it in double quotes.
-- On Netlify, paste the raw key value (the UI handles multiline values correctly).
+- Preserve the key's newlines in the Cloudflare secret value.
 - If you see `error:0909006C:PEM routines`, the key's `\n` characters are being treated as literal text. Make sure they're actual newline characters.
 
 ### AI features not working

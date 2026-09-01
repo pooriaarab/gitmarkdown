@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase/admin';
 import { decrypt } from '@/app/api/auth/session/route';
 
 const MAX_KEYS_PER_USER = 5;
@@ -19,8 +19,11 @@ async function authenticateWithFirebase(
   }
   try {
     const idToken = authHeader.slice(7);
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const userDoc = await adminDb.collection('users').doc(decoded.uid).get();
+    const decoded = await (await getAdminAuth()).verifyIdToken(idToken);
+    const userDoc = await (await getAdminDb())
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
     const encryptedToken = userDoc.data()?.encryptedGithubToken as
       | string
       | undefined;
@@ -71,13 +74,13 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
 
     // Use a transaction to atomically check count + create key
-    const keysRef = adminDb
+    const keysRef = (await getAdminDb())
       .collection('apiKeys')
       .doc(auth.userId)
       .collection('keys');
 
     const newDocRef = keysRef.doc(); // pre-generate doc ref for use inside transaction
-    await adminDb.runTransaction(async (transaction) => {
+    await (await getAdminDb()).runTransaction(async (transaction) => {
       const snapshot = await transaction.get(keysRef);
       if (snapshot.size >= MAX_KEYS_PER_USER) {
         throw new Error(`Maximum of ${MAX_KEYS_PER_USER} API keys allowed per user`);
@@ -127,7 +130,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const keysRef = adminDb
+    const keysRef = (await getAdminDb())
       .collection('apiKeys')
       .doc(auth.userId)
       .collection('keys');
@@ -176,7 +179,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const keyRef = adminDb
+    const keyRef = (await getAdminDb())
       .collection('apiKeys')
       .doc(auth.userId)
       .collection('keys')
