@@ -1,0 +1,27 @@
+name: jscpd
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jscpd:
+    name: jscpd (copy-paste detection)
+    runs-on: ubicloud-standard-2
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # bunx runs downloaded package code; keep the token out of .git/config.
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+      - name: jscpd
+        run: bunx jscpd@5.1.1 --no-tips .
