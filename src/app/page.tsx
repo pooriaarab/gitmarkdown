@@ -843,6 +843,9 @@ export default function LandingPage() {
             GitMarkdown
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link href="/brand" className="transition-colors hover:text-foreground">
+              Brand
+            </Link>
             <span className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
               Open Source
