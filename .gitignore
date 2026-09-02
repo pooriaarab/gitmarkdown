@@ -54,3 +54,4 @@ next-env.d.ts
 .vinext/
 .wrangler/
 /public/design.md
+# Cursor cloud — local secrets stay local
