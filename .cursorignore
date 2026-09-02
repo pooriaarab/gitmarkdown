@@ -1,0 +1,12 @@
+# Keep secrets and large/generated dirs out of agent context
+.env
+.env.local
+.env.*.local
+**/.secrets/**
+**/node_modules/**
+**/.next/**
+**/dist/**
+**/build/**
+**/.wrangler/**
+**/.turbo/**
+**/.venv/**
