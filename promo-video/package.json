@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@remotion/cli": "4.0.419",
+    "@remotion/cli": "4.0.520",
     "@remotion/google-fonts": "4.0.419",
     "@remotion/transitions": "4.0.419",
     "@types/react": "19.2.13",
