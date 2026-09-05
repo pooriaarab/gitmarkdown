@@ -1,0 +1,32 @@
+name: vibecodereview
+on:
+  pull_request:
+    types: [opened, synchronize, review_requested]
+    paths-ignore: ["**.md", "docs/**", "!VISION.md"]
+concurrency:
+  group: vibecodereview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    # Only review the repo owner's own PRs (cost + injection guard on public repos).
+    if: github.event.pull_request.user.login == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: pooriaarab/vibecodereview@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_code_oauth_token_2: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_2 }}
+          claude_code_oauth_token_3: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_3 }}
+          claude_code_oauth_token_4: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_4 }}
+          github_token: ${{ github.token }}
+          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          moonshot_api_key: ${{ secrets.MOONSHOT_API_KEY }}
+          openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          vibetrace_ingest_url: ${{ secrets.VIBETRACE_INGEST_URL }}
+          vibetrace_ingest_token: ${{ secrets.VIBETRACE_INGEST_TOKEN }}
