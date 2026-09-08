@@ -16,9 +16,9 @@
     "deploy:vinext": "npm run sync:design-doc && vinext-cloudflare deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.37",
-    "@ai-sdk/openai": "^3.0.25",
-    "@ai-sdk/react": "^3.0.75",
+    "@ai-sdk/anthropic": "^3.0.116",
+    "@ai-sdk/openai": "^3.0.109",
+    "@ai-sdk/react": "^3.0.280",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -51,7 +51,7 @@
     "@tiptap/starter-kit": "^3.19.0",
     "@tiptap/suggestion": "^3.19.0",
     "@vinext/cloudflare": "1.0.0-beta.6",
-    "ai": "6.0.73",
+    "ai": "6.0.277",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
