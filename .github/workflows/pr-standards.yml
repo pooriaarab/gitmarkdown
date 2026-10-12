@@ -8,13 +8,11 @@ concurrency:
   group: pr-standards-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-# This job waits on the GitHub API and does no compute, so it takes the
-# smallest runner. Private pooriaarab repos run every job on Ubicloud; the
-# self-hosted fleet is retired and `ubuntu-latest` is not the house default.
+# Public repositories use GitHub-hosted runners for fork pull requests.
 jobs:
   pr-standards:
     name: PR standards
-    runs-on: ubicloud-standard-2
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
