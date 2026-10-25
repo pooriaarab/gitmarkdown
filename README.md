@@ -44,6 +44,7 @@ GitMarkdown is a web-based markdown editor that integrates with GitHub repositor
 ```bash
 git clone https://github.com/pooriaarab/gitmarkdown.git
 cd gitmarkdown
+gh repo clone pooriaarab/supportsheep supportsheep -- --branch main --single-branch
 npm install
 cp .env.example .env.local
 # Fill in your credentials (see below)
@@ -51,6 +52,17 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+The help center uses the private `pooriaarab/supportsheep` repository.
+CI checks out its `main` branch with the read-only `SUPPORTSHEEP_SSH_KEY` secret.
+
+Run the browser check against the local server or a Worker Preview:
+
+```sh
+npm run verify:support -- http://localhost:3000 /support/articles/getting-started/connect-github "Connect GitHub"
+```
+
+The check saves screenshots and `report.json` in `e2e-artifacts/support`.
 
 ### Firebase Setup
 
