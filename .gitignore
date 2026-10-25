@@ -1,1 +1,62 @@
-IyBTZWUgaHR0cHM6Ly9oZWxwLmdpdGh1Yi5jb20vYXJ0aWNsZXMvaWdub3JpbmctZmlsZXMvIGZvciBtb3JlIGFib3V0IGlnbm9yaW5nIGZpbGVzLgoKIyBkZXBlbmRlbmNpZXMKL25vZGVfbW9kdWxlcwpwcm9tby12aWRlby9ub2RlX21vZHVsZXMKcHJvbW8tdmlkZW8vb3V0Ci8ucG5wCi5wbnAuKgoueWFybi8qCiEueWFybi9wYXRjaGVzCiEueWFybi9wbHVnaW5zCiEueWFybi9yZWxlYXNlcwohLnlhcm4vdmVyc2lvbnMKCiMgdGVzdGluZwovY292ZXJhZ2UKCiMgbmV4dC5qcwovLm5leHQvCi9vdXQvCgojIHByb2R1Y3Rpb24KL2J1aWxkCgojIG1pc2MKLkRTX1N0b3JlCioucGVtCgojIGRlYnVnCm5wbS1kZWJ1Zy5sb2cqCnlhcm4tZGVidWcubG9nKgp5YXJuLWVycm9yLmxvZyoKLnBucG0tZGVidWcubG9nKgoKIyBlbnYgZmlsZXMKLmVudgouZW52LmxvY2FsCi5lbnYuKi5sb2NhbAoKIyBjbGF1ZGUKLmNsYXVkZS8KCiMgcGxheXdyaWdodCBtY3AKLnBsYXl3cmlnaHQtbWNwLwoKIyB2ZXJjZWwKLnZlcmNlbAoKIyB0eXBlc2NyaXB0CioudHNidWlsZGluZm8KbmV4dC1lbnYuZC50cwoKL2Rpc3QvCi52aW5leHQvCi53cmFuZ2xlci8KL3B1YmxpYy9kZXNpZ24ubWQKIyBDdXJzb3IgY2xvdWQg4oCUIGxvY2FsIHNlY3JldHMgc3RheSBsb2NhbAovc3VwcG9ydHNoZWVwLyoKIS9zdXBwb3J0c2hlZXAvcGFja2FnZXMvCi9zdXBwb3J0c2hlZXAvcGFja2FnZXMvKgohL3N1cHBvcnRzaGVlcC9wYWNrYWdlcy9zdXBwb3J0LwovZTJlLWFydGlmYWN0cy8K
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+promo-video/node_modules
+promo-video/out
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# claude
+.claude/
+
+# playwright mcp
+.playwright-mcp/
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/dist/
+.vinext/
+.wrangler/
+/public/design.md
+# Cursor cloud — local secrets stay local
+/private-repo-3d96/*
+!/private-repo-3d96/packages/
+/private-repo-3d96/packages/*
+!/private-repo-3d96/packages/support/
+/e2e-artifacts/
