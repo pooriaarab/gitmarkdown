@@ -55,5 +55,8 @@ next-env.d.ts
 .wrangler/
 /public/design.md
 # Cursor cloud — local secrets stay local
-/supportsheep
+/supportsheep/*
+!/supportsheep/packages/
+/supportsheep/packages/*
+!/supportsheep/packages/support/
 /e2e-artifacts/
