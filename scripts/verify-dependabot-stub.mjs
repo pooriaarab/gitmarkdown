@@ -1,0 +1,1 @@
+b'#!/usr/bin/env node\nimport { readFileSync } from "node:fs";\nconst path = "supportsheep/packages/support/package.json";\nJSON.parse(readFileSync(path, "utf8"));\nconsole.log("ok", path);\n'
