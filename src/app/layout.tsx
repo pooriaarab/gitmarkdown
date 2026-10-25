@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { ThemedToaster } from '@/components/ui/themed-toaster';
 import { CodeThemeStyle } from '@/components/editor/code-theme-style';
+import { isWorkerPreview, PREVIEW_ROBOTS } from '@/lib/preview';
 import './globals.css';
 
 const geistSans = Geist({
@@ -63,7 +64,7 @@ export const metadata: Metadata = {
     description: siteDescription,
     images: ['/og-image.png'],
   },
-  robots: {
+  robots: isWorkerPreview() ? PREVIEW_ROBOTS : {
     index: true,
     follow: true,
     googleBot: {
