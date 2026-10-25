@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@pooriaarab/support"],
+  async rewrites() {
+    return {
+      afterFiles: [
+        {
+          source: "/support/articles/:category/:slug.md",
+          destination: "/support/md/:category/:slug",
+        },
+      ],
+    };
+  },
   images: {
     remotePatterns: [
       {

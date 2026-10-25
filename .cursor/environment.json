@@ -1,0 +1,12 @@
+{
+  "name": "gitmarkdown Cloud Environment",
+  "install": "npm ci",
+  "start": "echo 'Environment ready for cloud agents'",
+  "terminals": [
+    {
+      "name": "Verify",
+      "command": "npm run lint",
+      "description": "Run tests/lint before opening PRs"
+    }
+  ]
+}

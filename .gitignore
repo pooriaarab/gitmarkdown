@@ -54,3 +54,9 @@ next-env.d.ts
 .vinext/
 .wrangler/
 /public/design.md
+# Cursor cloud — local secrets stay local
+/private-repo-3d96/*
+!/private-repo-3d96/packages/
+/private-repo-3d96/packages/*
+!/private-repo-3d96/packages/support/
+/e2e-artifacts/

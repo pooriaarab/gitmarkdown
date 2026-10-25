@@ -2,7 +2,12 @@
   "min-tokens": 100,
   "threshold": 5,
   "mode": "mild",
-  "format": ["typescript", "tsx", "javascript", "jsx"],
+  "format": [
+    "typescript",
+    "tsx",
+    "javascript",
+    "jsx"
+  ],
   "ignore": [
     "**/__tests__/**",
     "**/*.{test,spec}.{ts,tsx,js,jsx}",
@@ -12,6 +17,7 @@
     "**/build/**",
     "**/coverage/**",
     "**/vendor/**",
-    "**/*.min.js"
+    "**/*.min.js",
+    "**/private-repo-3d96/**"
   ]
 }

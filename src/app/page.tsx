@@ -852,6 +852,9 @@ export default function LandingPage() {
             GitMarkdown
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link href="/support" className="transition-colors hover:text-foreground">
+              Help center
+            </Link>
             <Link href="/brand" className="transition-colors hover:text-foreground">
               Brand
             </Link>
