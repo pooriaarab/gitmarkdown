@@ -13,7 +13,7 @@ export const supportConfig: SupportSiteConfig = {
     {
       slug: "editing",
       name: "Editing",
-      description: "Editor features, previews, and collaboration.",
+      description: "Formatting, commits, and collaboration.",
     },
     {
       slug: "account",
@@ -41,16 +41,17 @@ Choose a repository and branch in the editor. Open a Markdown file from the file
       slug: "edit-in-a-pull-request",
       category: "editing",
       title: "Edit in a pull request",
-      description: "WYSIWYG Markdown with live preview.",
+      description: "Edit formatted Markdown and commit your changes.",
       updatedAt: "2026-10-24",
       content: `## Open files
 Use the file tree to switch between Markdown files in the PR branch.
 
-## Preview
-Split view shows rendered Markdown next to the editor.
+## Format your document
+Edit the rendered document directly. Use the toolbar or slash commands to format text.
 
 ## Commit
-Save commits back to the PR branch. Resolve conflicts in GitHub if the base branch moved.`,
+Open the commit dialog and review your changes. Enter a commit message, then choose **Commit & Push**.
+Check the selected branch before you commit. Resolve conflicts in GitHub if the branch changed.`,
     },
     {
       slug: "repository-access",
