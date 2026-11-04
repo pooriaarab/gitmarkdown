@@ -10,13 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@remotion/cli": "4.0.520",
-    "@remotion/google-fonts": "4.0.419",
-    "@remotion/transitions": "4.0.419",
-    "@types/react": "19.2.13",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "remotion": "4.0.419",
-    "typescript": "5.9.3"
+    "@remotion/cli": "^4.0.540",
+    "@remotion/google-fonts": "^4.0.540",
+    "@remotion/transitions": "^4.0.540",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.540",
+    "typescript": "^6.0.3"
   }
 }
